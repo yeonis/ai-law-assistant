@@ -109,3 +109,35 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+.empty-result {
+  padding: 64px 24px;
+  text-align: center;
+  background: #f8faf9;
+  border: 1px dashed #d1e5db;
+  border-radius: 16px;
+}
+
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  background: #e5f5ed;
+  color: #059669;
+  border-radius: 50%;
+  font-size: 36px;
+}
+
+.empty-result h3 {
+  margin: 0 0 10px;
+  color: #253858;
+  font-size: 18px;
+}
+
+.empty-result p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 14px;
+}
