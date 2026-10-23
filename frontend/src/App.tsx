@@ -38,7 +38,7 @@ function App() {
     return (
         <div className="app">
             <div className="hero">
-                <span className="hero-label">법령 검색의 새로운 기준</span>
+                <span className="hero-label">관세법령 검색 플랫폼</span>
                 <h1>LAW:<span className="hero-accent">ON</span></h1>
                 <p>복잡한 관세법령, 쉽고 명확하게.</p>
             </div>
