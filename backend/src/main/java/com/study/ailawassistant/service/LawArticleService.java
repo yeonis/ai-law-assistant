@@ -5,8 +5,10 @@ import com.study.ailawassistant.repository.LawArticleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class LawArticleService {
@@ -27,30 +29,38 @@ public class LawArticleService {
                         article.getArticleNo(),
                         article.getArticleBranchNo(),
                         article.getArticleTitle(),
-                        article.getArticleContent()
+                        article.getArticleContent(),
+                        null
                 ))
                 .toList();
     }
 
-    public List<LawArticleDto> searchArticles(String keyword)  {
+    public Page<LawArticleDto> searchArticles(
+            String keyword,
+            int page,
+            int size
+    ) {
+        if (keyword == null || keyword.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "검색어를 입력해주세요."
+            );
+        }
 
-        if(keyword == null || keyword.isBlank()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "검색어를 입력해주세요.");
+        if (page < 0 || size < 1 || size > 100) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "올바르지 않은 페이지 요청입니다."
+            );
         }
 
         keyword = keyword.strip();
 
-        return lawArticleRepository
-                .findByArticleTitleContainingOrArticleContentContaining(keyword,keyword)
-                .stream()
-                .map(article -> new LawArticleDto(
-                        article.getArticleId(),
-                        article.getLawSerialNo(),
-                        article.getArticleNo(),
-                        article.getArticleBranchNo(),
-                        article.getArticleTitle(),
-                        article.getArticleContent()
-                ))
-                .toList();
+        Pageable pageable = PageRequest.of(page, size);
+
+        return lawArticleRepository.searchArticlesWithLawName(
+                keyword,
+                pageable
+        );
     }
 }

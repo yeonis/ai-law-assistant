@@ -6,6 +6,7 @@ public record LawArticleDto(
     Integer articleNo,
     Integer articleBranchNo,
     String articleTitle,
-    String articleContent
+    String articleContent,
+    String lawName
 ){
 }
