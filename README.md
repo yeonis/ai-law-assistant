@@ -11,14 +11,14 @@
 
 관세법령을 키워드로 검색할 수 있는 메인 화면입니다.
 
-![LAWON 메인 화면](docs/images/main.png)
+![LAWON 메인 화면](docs/main.png)
 
 ### 법령 검색 결과
 
 검색어에 해당하는 조문을 제목 우선으로 정렬하고,
 검색어 하이라이트 및 조문 펼치기 기능을 제공합니다.
 
-![LAWON 법령 검색 결과](docs/images/search-result.png)
+![LAWON 법령 검색 결과](docs/search-result.png)
 
 
 ## 프로젝트 소개
