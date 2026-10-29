@@ -300,3 +300,9 @@
 .home-logo:hover {
   opacity: 0.85;
 }
+.article-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 16px 0;
+}

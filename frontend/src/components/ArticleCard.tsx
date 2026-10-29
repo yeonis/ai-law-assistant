@@ -1,5 +1,6 @@
 import type { LawArticle } from '../types/law';
 import HighlightedText from './HighlightedText';
+import ArticleContent from './ArticleContent';
 
 type ArticleCardProps = {
     article: LawArticle;
@@ -17,6 +18,12 @@ function ArticleCard({
                          setExpandedId,
                          keyword
                      }: ArticleCardProps) {
+
+    const cleanContent = article.articleContent
+        .replace(/&#x20;/gi, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&#160;/g, ' ');
+
     return (
         <div className="article-card">
             <div className="article-meta">
@@ -30,26 +37,28 @@ function ArticleCard({
                 keyword={keyword}
                 />
             </h3>
-            <p className={
+
+            <div className={
                 (expandAll || article.articleId === expandedId)
                     ? "article-content expanded"
                     : "article-content preview"
             }>
-                <HighlightedText
-                    text={
+                <ArticleContent
+                    content={
                         (expandAll || article.articleId === expandedId)
-                            ? article.articleContent
-                            : article.articleContent.slice(0, 100)
+                            ? cleanContent
+                            : cleanContent.slice(0, 100)
                     }
                     keyword={keyword}
                 />
 
                 {!expandAll &&
                     article.articleId !== expandedId &&
-                    article.articleContent.length > 100 &&
+                    cleanContent.length > 100 &&
                     '...'}
-            </p>
-            {!expandAll && article.articleContent.length > 100 && (
+            </div>
+
+            {!expandAll && cleanContent.length > 100 && (
                 <button
                     className="more-button"
                     onClick={() => setExpandedId(
