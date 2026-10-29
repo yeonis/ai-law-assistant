@@ -39,4 +39,17 @@ public class Law {
     public String getLawType() {
         return lawType;
     }
+
+    public Law(
+            Long lawId,
+            String lawName,
+            String lawType,
+            String lawShortName
+    ) {
+        this.lawId = lawId;
+        this.lawName = lawName;
+        this.lawType = lawType;
+        this.lawShortName = lawShortName;
+        this.createdAt = LocalDateTime.now();
+    }
 }

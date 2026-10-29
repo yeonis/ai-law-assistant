@@ -47,4 +47,20 @@ public class LawVersion {
     public LocalDate getEffectiveDate() {
         return effectiveDate;
     }
+
+    public LawVersion(
+            Long lawSerialNo,
+            Long lawId,
+            LocalDate promulgationDate,
+            LocalDate effectiveDate,
+            Integer promulgationNo,
+            String revisionType
+    ) {
+        this.lawSerialNo = lawSerialNo;
+        this.lawId = lawId;
+        this.promulgationDate = promulgationDate;
+        this.effectiveDate = effectiveDate;
+        this.promulgationNo = promulgationNo;
+        this.revisionType = revisionType;
+    }
 }

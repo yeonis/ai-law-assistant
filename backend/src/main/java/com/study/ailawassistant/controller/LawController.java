@@ -6,6 +6,7 @@ import com.study.ailawassistant.dto.LawVersionDto;
 import com.study.ailawassistant.service.LawArticleService;
 import com.study.ailawassistant.service.LawService;
 import com.study.ailawassistant.service.LawVersionService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,9 +56,11 @@ public class LawController {
     }
 
     @GetMapping("/api/laws/articles/search")
-    public List<LawArticleDto> searchArticles(
-            @RequestParam String keyword
+    public Page<LawArticleDto> searchArticles(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        return lawArticleService.searchArticles(keyword);
+        return lawArticleService.searchArticles(keyword, page, size);
     }
 }

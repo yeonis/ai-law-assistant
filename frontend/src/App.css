@@ -93,6 +93,23 @@
   line-height: 1.8;
 }
 
+.article-content {
+  color: #374151;
+  overflow-wrap: anywhere;
+}
+
+.article-content.expanded {
+  white-space: pre-wrap;
+  font-size: 17px;
+  line-height: 2;
+}
+
+.article-content.preview {
+  white-space: normal;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
 .hero {
   margin-bottom: 42px;
 }
@@ -122,4 +139,164 @@
   margin-top: 12px;
   color: #64748b;
   font-size: 15px;
+}
+
+/* 검색 결과 건수 */
+.result-count {
+  margin: 24px 0 16px;
+  padding: 14px 18px;
+  background-color: #f5f7fb;
+  border: 1px solid #e5eaf2;
+  border-radius: 10px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.result-count strong {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+/* 검색 오류 메시지 */
+.error-message {
+  margin: 20px 0;
+  padding: 14px 18px;
+  background-color: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #b91c1c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.more-button {
+  margin-top: 8px;
+  padding: 8px 14px;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  color: #059669;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.more-button:hover {
+  background-color: #d1fae5;
+  border-color: #059669;
+}
+
+.more-button:active {
+  transform: scale(0.97);
+}
+
+/* 검색 결과 상단 */
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 28px 0 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* 검색 결과 건수 */
+.result-header .result-count {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.result-header .result-count strong {
+  margin-left: 6px;
+  color: #1e3a5f;
+  font-weight: 700;
+}
+
+/* 전체 펼치기 버튼 */
+.expand-all-button {
+  padding: 9px 16px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #365c91;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.expand-all-button:hover {
+  background: #eef4fc;
+  border-color: #9bb5d6;
+  transform: translateY(-1px);
+}
+
+.expand-all-button:active {
+  transform: translateY(0);
+}
+
+.expand-all-button:focus-visible {
+  outline: 2px solid #365c91;
+  outline-offset: 3px;
+}
+.article-meta {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 36px 0;
+}
+
+.pagination button {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #f0fdf4;
+  border-color: #64748b;
+}
+
+.pagination button.active {
+  background: #24364b;
+  color: white;
+  border-color: #24364b;
+}
+
+.pagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.home-logo {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.home-logo:hover {
+  opacity: 0.85;
 }

@@ -1,4 +1,4 @@
-package client;
+package com.study.ailawassistant.client;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
