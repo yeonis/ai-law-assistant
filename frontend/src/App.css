@@ -306,3 +306,72 @@
   height: auto;
   margin: 16px 0;
 }
+.date-filter {
+  display: flex;
+  justify-content: flex-end;
+  margin: 16px 0 32px;
+}
+
+.date-filter-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 8px 16px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  background: #f8fafc;
+}
+
+.date-filter label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.date-icon {
+  color: #059669;
+  font-size: 17px;
+}
+
+.date-filter input[type="date"] {
+  width: 145px;
+  padding: 4px 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #1b2d4b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.today-button {
+  border: none;
+  border-radius: 20px;
+  padding: 7px 14px;
+  background: #e0f5ec;
+  color: #059669;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.today-button:hover {
+  background: #c7ebda;
+}
+
+@media (max-width: 480px) {
+  .date-filter {
+    justify-content: center;
+  }
+
+  .date-filter-inner {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+}

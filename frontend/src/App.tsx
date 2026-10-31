@@ -16,12 +16,27 @@ function App() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
+    const getToday = () =>
+        new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).format(new Date());
+
+    const [searchDate, setSearchDate] = useState(getToday);
+    const [searchedDate, setSearchedDate] = useState('');
+
 
     const handleSearch = async (pageNumber:number = 0) => {
         // 공백을 제거한 검색어
         const trimmedKeyword = pageNumber === 0
             ? keyword.trim()
             : searchedKeyword;
+
+        const selectedDate = pageNumber === 0
+            ? searchDate
+            : searchedDate;
 
         // 검색어가 비어 있으면 검색하지 않음
         if (!trimmedKeyword) {
@@ -35,8 +50,15 @@ function App() {
         setExpandedId(null);
 
         try{
+            const params = new URLSearchParams({
+                keyword: trimmedKeyword,
+                date: selectedDate,
+                page: String(pageNumber),
+                size: '10'
+            });
+
             const response = await fetch(
-                `http://localhost:8080/api/laws/articles/search?keyword=${encodeURIComponent(trimmedKeyword)}&page=${pageNumber}&size=10`,
+                `http://localhost:8080/api/laws/articles/search?${params.toString()}`
             );
 
             if(!response.ok){
@@ -56,6 +78,7 @@ function App() {
             setTotalElements(data.totalElements);
             setSearchedKeyword(trimmedKeyword);
             setHasSearched(true);
+            setSearchedDate(selectedDate);
 
 
         } catch (error) {
@@ -85,6 +108,8 @@ function App() {
         setPage(0);
         setTotalPages(0);
         setTotalElements(0);
+        setSearchDate(getToday());
+        setSearchedDate('');
     };
 
     return (
@@ -123,6 +148,30 @@ function App() {
                     {loading ? '검색 중...' : '검색'}
                 </button>
             </form>
+            <div className="date-filter">
+                <div className="date-filter-inner">
+                    <label htmlFor="search-date">
+                        <span className="date-icon">▦</span>
+                        법령 기준일
+                    </label>
+
+                    <input
+                        id="search-date"
+                        type="date"
+                        value={searchDate}
+                        onChange={(e) => setSearchDate(e.target.value)}
+                        max={getToday()}
+                    />
+
+                    <button
+                        type="button"
+                        className="today-button"
+                        onClick={() => setSearchDate(getToday())}
+                    >
+                        오늘
+                    </button>
+                </div>
+            </div>
 
             {error && <p className="error-message">{error}</p>}
             <div className="results">
