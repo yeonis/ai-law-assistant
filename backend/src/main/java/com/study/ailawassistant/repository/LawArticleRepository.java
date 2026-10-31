@@ -6,6 +6,8 @@ import com.study.ailawassistant.dto.LawArticleDto;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -56,6 +58,13 @@ public interface LawArticleRepository
     Page<LawArticleDto> searchArticlesWithLawName(
             @Param("keyword") String keyword,
             Pageable pageable
+    );
+
+
+    Optional<LawArticle> findByLawSerialNoAndArticleNoAndArticleBranchNo(
+            Long lawSerialNo,
+            Integer articleNo,
+            Integer articleBranchNo
     );
 
 }
