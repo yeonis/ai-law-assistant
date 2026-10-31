@@ -9,7 +9,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface LawArticleRepository extends JpaRepository<LawArticle,Long> {
+public interface LawArticleRepository
+        extends JpaRepository<LawArticle,Long>,
+                LawArticleSearchRepository {
     List<LawArticle> findByLawSerialNoOrderByArticleNoAscArticleBranchNoAsc(Long lawSerialNo);
     List<LawArticle> findByArticleTitleContainingOrArticleContentContaining(String titleKeyword, String contentKeyword);
 
