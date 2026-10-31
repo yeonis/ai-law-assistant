@@ -13,6 +13,8 @@ import com.study.ailawassistant.entity.Law;
 import jakarta.persistence.TypedQuery;
 import org.springframework.data.domain.PageImpl;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -29,6 +31,7 @@ public class LawArticleSearchRepositoryImpl
     @Override
     public Page<LawArticleDto> searchByKeywords(
             List<String> keywords,
+            LocalDate searchDate,
             Pageable pageable
     ) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -51,6 +54,52 @@ public class LawArticleSearchRepositoryImpl
         conditions.add(
                 cb.equal(version.get("lawId"), law.get("lawId"))
         );
+
+
+        // 1. 기준일까지 시행된 버전만 검색
+        conditions.add(
+                cb.lessThanOrEqualTo(
+                        version.<LocalDate>get("effectiveDate"),
+                        searchDate
+                )
+        );
+
+        // 2. 나보다 더 최근에 시행된 버전이 있는지 확인
+        Subquery<Integer> subquery = query.subquery(Integer.class);
+
+        Root<LawVersion> newer = subquery.from(LawVersion.class);
+
+        subquery.select(cb.literal(1));
+
+        subquery.where(
+                cb.equal(
+                        newer.get("lawId"),
+                        version.get("lawId")
+                ),
+                cb.lessThanOrEqualTo(
+                        newer.<LocalDate>get("effectiveDate"),
+                        searchDate
+                ),
+                cb.or(
+                        cb.greaterThan(
+                                newer.<LocalDate>get("effectiveDate"),
+                                version.<LocalDate>get("effectiveDate")
+                        ),
+                        cb.and(
+                                cb.equal(
+                                        newer.get("effectiveDate"),
+                                        version.get("effectiveDate")
+                                ),
+                                cb.greaterThan(
+                                        newer.<Long>get("lawSerialNo"),
+                                        version.<Long>get("lawSerialNo")
+                                )
+                        )
+                )
+        );
+
+        // 3. 더 최근 버전이 없는 경우만 통과
+        conditions.add(cb.not(cb.exists(subquery)));
 
         //키워드별 검색 조건
         for (String keyword : keywords) {
@@ -153,6 +202,51 @@ public class LawArticleSearchRepositoryImpl
                         countLaw.get("lawId")
                 )
         );
+
+        // 1. 기준일까지 시행된 버전만 검색
+        countConditions.add(
+                cb.lessThanOrEqualTo(
+                        countVersion.<LocalDate>get("effectiveDate"),
+                        searchDate
+                )
+        );
+
+        // 2. 나보다 더 최근에 시행된 버전이 있는지 확인
+        Subquery<Integer> countSubquery = countQuery.subquery(Integer.class);
+
+        Root<LawVersion> countNewer = countSubquery.from(LawVersion.class);
+
+        countSubquery.select(cb.literal(1));
+
+        countSubquery.where(
+                cb.equal(
+                        countNewer.get("lawId"),
+                        countVersion.get("lawId")
+                ),
+                cb.lessThanOrEqualTo(
+                        countNewer.<LocalDate>get("effectiveDate"),
+                        searchDate
+                ),
+                cb.or(
+                        cb.greaterThan(
+                                countNewer.<LocalDate>get("effectiveDate"),
+                                countVersion.<LocalDate>get("effectiveDate")
+                        ),
+                        cb.and(
+                                cb.equal(
+                                        countNewer.get("effectiveDate"),
+                                        countVersion.get("effectiveDate")
+                                ),
+                                cb.greaterThan(
+                                        countNewer.<Long>get("lawSerialNo"),
+                                        countVersion.<Long>get("lawSerialNo")
+                                )
+                        )
+                )
+        );
+
+        // 3. 더 최근 버전이 없는 경우만 통과
+        countConditions.add(cb.not(cb.exists(countSubquery)));
 
         for (String keyword : keywords) {
 

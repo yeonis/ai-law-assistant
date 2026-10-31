@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -40,7 +42,8 @@ public class LawArticleService {
     public Page<LawArticleDto> searchArticles(
             String keyword,
             int page,
-            int size
+            int size,
+            LocalDate date
     ) {
         if (keyword == null || keyword.isBlank()) {
             throw new ResponseStatusException(
@@ -62,8 +65,13 @@ public class LawArticleService {
 
         Pageable pageable = PageRequest.of(page, size);
 
+        LocalDate searchDate = date != null
+                ? date
+                : LocalDate.now(ZoneId.of("Asia/Seoul"));
+
         return lawArticleRepository.searchByKeywords(
                 keywords,
+                searchDate,
                 pageable
         );
     }

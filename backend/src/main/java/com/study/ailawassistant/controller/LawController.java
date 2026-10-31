@@ -7,9 +7,11 @@ import com.study.ailawassistant.service.LawArticleService;
 import com.study.ailawassistant.service.LawService;
 import com.study.ailawassistant.service.LawVersionService;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -59,8 +61,11 @@ public class LawController {
     public Page<LawArticleDto> searchArticles(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDate date
     ) {
-        return lawArticleService.searchArticles(keyword, page, size);
+        return lawArticleService.searchArticles(keyword, page, size, date);
     }
 }

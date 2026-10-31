@@ -87,9 +87,13 @@ public class LawImportService {
 
         String revisionType = basicInfo.path("제개정구분").asText();
 
-        Law law = new Law(
-                lawId, lawName, lawType, lawShortName
-        );
+        if (!lawRepository.existsById(lawId)) {
+            Law law = new Law(
+                    lawId, lawName, lawType, lawShortName
+            );
+
+            lawRepository.save(law);
+        }
 
         LawVersion lawVersion = new LawVersion(
                 Long.valueOf(mst),
@@ -194,7 +198,6 @@ public class LawImportService {
         }
 
         System.out.println("생성된 조문 객체 수: " + lawArticles.size());
-        lawRepository.save(law);
         lawVersionRepository.save(lawVersion);
         lawArticleRepository.saveAll(lawArticles);
 
