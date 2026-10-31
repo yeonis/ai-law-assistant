@@ -12,8 +12,11 @@ function HighlightedText({ text, keyword }: HighlightedTextProps) {
     if(!keyword){
         return <>{text}</>;
     }
-    const escapedKeyword = escapeRegExp(keyword);
-    const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+    const escapedKeywords = keyword.trim()
+        .split(/\s+/)
+        .map(escapeRegExp);
+
+    const regex = new RegExp(`(${escapedKeywords.join('|')})`, 'gi');
     const parts = text.split(regex);
 
     return (
