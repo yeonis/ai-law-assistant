@@ -5,7 +5,7 @@ export type LawArticle = {
     articleBranchNo: number;
     articleTitle: string;
     articleContent: string;
-    lawName: string;
+    lawName: string | null;
 };
 
 export interface LawArticleCompare {

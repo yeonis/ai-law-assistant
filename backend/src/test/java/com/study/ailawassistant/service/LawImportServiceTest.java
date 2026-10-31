@@ -13,6 +13,6 @@ class LawImportServiceTest {
 
     @Test
     void importLawTest() {
-        lawImportService.importLaw("280363");
+        lawImportService.importLaw("285861");
     }
 }
