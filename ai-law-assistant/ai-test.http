@@ -1,0 +1,8 @@
+
+POST http://localhost:8080/api/ai/ask
+Content-Type: application/json
+
+{
+  "question": "협정관세",
+  "date": "2026-10-31"
+}
