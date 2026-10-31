@@ -1,5 +1,6 @@
 package com.study.ailawassistant.controller;
 
+import com.study.ailawassistant.dto.LawArticleCompareDto;
 import com.study.ailawassistant.dto.LawArticleDto;
 import com.study.ailawassistant.dto.LawDto;
 import com.study.ailawassistant.dto.LawVersionDto;
@@ -67,5 +68,33 @@ public class LawController {
             LocalDate date
     ) {
         return lawArticleService.searchArticles(keyword, page, size, date);
+    }
+
+    @GetMapping("/api/laws/articles/compare")
+    public LawArticleCompareDto compareArticles(
+            @RequestParam Long oldMst,
+            @RequestParam Long newMst,
+            @RequestParam Integer articleNo,
+            @RequestParam(defaultValue = "0") Integer branchNo
+    ) {
+        return lawArticleService.compareArticles(
+                oldMst,
+                newMst,
+                articleNo,
+                branchNo
+        );
+    }
+
+    @GetMapping("/api/laws/articles/compare/previous")
+    public LawArticleCompareDto compareWithPrevious(
+            @RequestParam Long currentMst,
+            @RequestParam Integer articleNo,
+            @RequestParam(defaultValue = "0") Integer branchNo
+    ) {
+        return lawArticleService.compareWithPrevious(
+                currentMst,
+                articleNo,
+                branchNo
+        );
     }
 }

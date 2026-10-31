@@ -7,3 +7,8 @@ export type LawArticle = {
     articleContent: string;
     lawName: string;
 };
+
+export interface LawArticleCompare {
+    oldArticle: LawArticle;
+    newArticle: LawArticle;
+}

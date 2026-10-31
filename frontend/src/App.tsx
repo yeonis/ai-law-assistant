@@ -1,7 +1,8 @@
 import './App.css';
 import {useState} from 'react';
 import ArticleCard from './components/ArticleCard';
-import type { LawArticle } from './types/law'
+import ArticleCompare from './components/ArticleCompare';
+import type { LawArticle, LawArticleCompare } from './types/law'
 
 function App() {
 
@@ -26,6 +27,11 @@ function App() {
 
     const [searchDate, setSearchDate] = useState(getToday);
     const [searchedDate, setSearchedDate] = useState('');
+    const [compareResult, setCompareResult] =
+        useState<LawArticleCompare | null>(null);
+
+    const [compareLoading, setCompareLoading] = useState(false);
+    const [compareError, setCompareError] = useState('');
 
 
     const handleSearch = async (pageNumber:number = 0) => {
@@ -48,6 +54,8 @@ function App() {
         setError('');
         setExpandAll(false);
         setExpandedId(null);
+        setCompareResult(null);
+        setCompareError('');
 
         try{
             const params = new URLSearchParams({
@@ -92,6 +100,47 @@ function App() {
         }
     };
 
+    const handleCompare = async (
+        currentMst: number,
+        articleNo: number,
+        branchNo: number
+    ) => {
+        setCompareLoading(true);
+        setCompareError('');
+        setCompareResult(null);
+
+        try {
+            const params = new URLSearchParams({
+                currentMst: String(currentMst),
+                articleNo: String(articleNo),
+                branchNo: String(branchNo)
+            });
+
+            const response = await fetch(
+                `http://localhost:8080/api/laws/articles/compare/previous?${params.toString()}`
+            );
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('이전 버전 또는 해당 조문을 찾을 수 없습니다.');
+                }
+                throw new Error('법령 비교 요청에 실패했습니다.');
+            }
+
+            const data: LawArticleCompare = await response.json();
+            setCompareResult(data);
+
+        } catch (error) {
+            setCompareError(
+                error instanceof Error
+                    ? error.message
+                    : '법령 비교 중 오류가 발생했습니다.'
+            );
+        } finally {
+            setCompareLoading(false);
+        }
+    };
+
     const handleExpandAll = () => {
         setExpandAll(!expandAll);
         setExpandedId(null);
@@ -110,6 +159,10 @@ function App() {
         setTotalElements(0);
         setSearchDate(getToday());
         setSearchedDate('');
+        // 비교 기능 초기화
+        setCompareResult(null);
+        setCompareError('');
+        setCompareLoading(false);
     };
 
     return (
@@ -148,6 +201,43 @@ function App() {
                     {loading ? '검색 중...' : '검색'}
                 </button>
             </form>
+
+            {(compareResult || compareError || compareLoading) && (
+                <section className="compare-section">
+                    <div className="compare-section-header">
+            <span className="compare-section-label">
+                법령 개정 이력
+            </span>
+
+                        <button
+                            type="button"
+                            className="compare-close-button"
+                            aria-label="비교 화면 닫기"
+                            onClick={() => {
+                                setCompareResult(null);
+                                setCompareError('');
+                            }}
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    {compareLoading ? (
+                        <div className="compare-notice">
+                            <p>법령 개정 이력을 불러오는 중입니다.</p>
+                        </div>
+                    ) : compareError ? (
+                        <div className="compare-notice">
+                            <span className="compare-notice-icon">ⓘ</span>
+                            <h3>비교할 법령 이력을 찾지 못했습니다.</h3>
+                            <p>{compareError}</p>
+                        </div>
+                    ) : compareResult ? (
+                        <ArticleCompare compareResult={compareResult} />
+                    ) : null}
+                </section>
+            )}
+
             <div className="date-filter">
                 <div className="date-filter-inner">
                     <label htmlFor="search-date">
@@ -197,6 +287,8 @@ function App() {
                             expandAll={expandAll}
                             setExpandedId={setExpandedId}
                             keyword={searchedKeyword}
+                            onCompare={handleCompare}
+                            compareLoading={compareLoading}
                         />
                     ))
                 ) : (
