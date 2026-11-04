@@ -12,6 +12,7 @@ public interface LawArticleSearchRepository {
     Page<LawArticleDto> searchByKeywords(
             List<String> keywords,
             LocalDate searchDate,
-            Pageable pageable
+            Pageable pageable,
+            SearchMode searchMode
     );
 }
