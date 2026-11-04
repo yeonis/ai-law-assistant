@@ -32,8 +32,11 @@ public class LawArticleSearchRepositoryImpl
     public Page<LawArticleDto> searchByKeywords(
             List<String> keywords,
             LocalDate searchDate,
-            Pageable pageable
+            Pageable pageable,
+            SearchMode searchMode
     ) {
+
+        System.out.println("Repository 검색 모드: " + searchMode);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
         CriteriaQuery<LawArticleDto> query =
@@ -101,7 +104,9 @@ public class LawArticleSearchRepositoryImpl
         // 3. 더 최근 버전이 없는 경우만 통과
         conditions.add(cb.not(cb.exists(subquery)));
 
-        //키워드별 검색 조건
+        // 키워드별 검색 조건
+        List<Predicate> keywordConditions = new ArrayList<>();
+
         for (String keyword : keywords) {
 
             String pattern = createLikePattern(keyword);
@@ -118,9 +123,20 @@ public class LawArticleSearchRepositoryImpl
                     '\\'
             );
 
-            conditions.add(
+            keywordConditions.add(
                     cb.or(titleMatch, contentMatch)
             );
+        }
+
+        // 검색 방식에 따라 AND 또는 OR 적용
+        if (!keywordConditions.isEmpty()) {
+
+            Predicate keywordPredicate =
+                    searchMode == SearchMode.AND
+                            ? cb.and(keywordConditions.toArray(new Predicate[0]))
+                            : cb.or(keywordConditions.toArray(new Predicate[0]));
+
+            conditions.add(keywordPredicate);
         }
 
         query.where(cb.and(conditions.toArray(new Predicate[0])));
@@ -152,10 +168,43 @@ public class LawArticleSearchRepositoryImpl
 
         Expression<Integer> titlePriority = cb.<Integer>selectCase()
                 .when(
-                        cb.and(titleConditions.toArray(new Predicate[0])),
+                        searchMode == SearchMode.AND
+                                ? cb.and(titleConditions.toArray(new Predicate[0]))
+                                : cb.or(titleConditions.toArray(new Predicate[0])),
                         0
                 )
                 .otherwise(1);
+
+        Expression<Integer> totalScore = cb.literal(0);
+
+        for (String keyword : keywords) {
+
+            String pattern = createLikePattern(keyword);
+
+            Predicate titleMatch = cb.like(
+                    article.get("articleTitle"),
+                    pattern,
+                    '\\'
+            );
+
+            Predicate contentMatch = cb.like(
+                    article.get("articleContent"),
+                    pattern,
+                    '\\'
+            );
+
+            // 제목 점수: 3점
+            Expression<Integer> titleScore = cb.<Integer>selectCase()
+                    .when(titleMatch, 3)
+                    .otherwise(0);
+
+            // 본문 점수: 1점
+            Expression<Integer> contentScore = cb.<Integer>selectCase()
+                    .when(contentMatch, 1)
+                    .otherwise(0);
+
+            totalScore = cb.sum(totalScore, cb.sum(titleScore, contentScore));
+        }
 
         Expression<Integer> lawPriority = cb.<Integer>selectCase()
                 .when(cb.equal(law.get("lawName"), "관세법"), 1)
@@ -163,13 +212,23 @@ public class LawArticleSearchRepositoryImpl
                 .when(cb.equal(law.get("lawName"), "관세법 시행규칙"), 3)
                 .otherwise(4);
 
-        query.orderBy(
-                cb.asc(titlePriority),
-                cb.asc(lawPriority),
-                cb.asc(article.get("articleNo")),
-                cb.asc(article.get("articleBranchNo")),
-                cb.asc(article.get("articleId"))
-        );
+        if (searchMode == SearchMode.OR) {
+            query.orderBy(
+                    cb.desc(totalScore),
+                    cb.asc(lawPriority),
+                    cb.asc(article.get("articleNo")),
+                    cb.asc(article.get("articleBranchNo")),
+                    cb.asc(article.get("articleId"))
+            );
+        } else {
+            query.orderBy(
+                    cb.asc(titlePriority),
+                    cb.asc(lawPriority),
+                    cb.asc(article.get("articleNo")),
+                    cb.asc(article.get("articleBranchNo")),
+                    cb.asc(article.get("articleId"))
+            );
+        }
 
         TypedQuery<LawArticleDto> typedQuery = entityManager.createQuery(query);
 
@@ -180,6 +239,8 @@ public class LawArticleSearchRepositoryImpl
         typedQuery.setMaxResults(pageable.getPageSize());
 
         List<LawArticleDto> results = typedQuery.getResultList();
+
+        System.out.println("검색 결과 건수: " + results.size());
 
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
 
@@ -248,6 +309,8 @@ public class LawArticleSearchRepositoryImpl
         // 3. 더 최근 버전이 없는 경우만 통과
         countConditions.add(cb.not(cb.exists(countSubquery)));
 
+        List<Predicate> countKeywordConditions = new ArrayList<>();
+
         for (String keyword : keywords) {
 
             String pattern = createLikePattern(keyword);
@@ -264,7 +327,19 @@ public class LawArticleSearchRepositoryImpl
                     '\\'
             );
 
-            countConditions.add(cb.or(titleMatch, contentMatch));
+            countKeywordConditions.add(
+                    cb.or(titleMatch, contentMatch)
+            );
+        }
+
+        if (!countKeywordConditions.isEmpty()) {
+
+            Predicate countKeywordPredicate =
+                    searchMode == SearchMode.AND
+                            ? cb.and(countKeywordConditions.toArray(new Predicate[0]))
+                            : cb.or(countKeywordConditions.toArray(new Predicate[0]));
+
+            countConditions.add(countKeywordPredicate);
         }
 
         countQuery.select(cb.count(countArticle));

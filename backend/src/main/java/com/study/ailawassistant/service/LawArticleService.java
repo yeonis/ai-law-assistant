@@ -6,6 +6,7 @@ import com.study.ailawassistant.entity.LawArticle;
 import com.study.ailawassistant.entity.LawVersion;
 import com.study.ailawassistant.repository.LawArticleRepository;
 import com.study.ailawassistant.repository.LawVersionRepository;
+import com.study.ailawassistant.repository.SearchMode;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -81,7 +82,8 @@ public class LawArticleService {
         return lawArticleRepository.searchByKeywords(
                 keywords,
                 searchDate,
-                pageable
+                pageable,
+                SearchMode.AND
         );
     }
     public LawArticleCompareDto compareArticles(
