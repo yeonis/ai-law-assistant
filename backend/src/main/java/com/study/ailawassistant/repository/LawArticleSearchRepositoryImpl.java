@@ -306,7 +306,7 @@ public class LawArticleSearchRepositoryImpl
                 )
         );
 
-        // 3. 더 최근 버전이 없는 경우만 통과
+        // 3. 더 최근 버전이 없는 경우만 통과햐
         countConditions.add(cb.not(cb.exists(countSubquery)));
 
         List<Predicate> countKeywordConditions = new ArrayList<>();

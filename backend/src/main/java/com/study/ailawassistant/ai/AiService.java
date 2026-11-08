@@ -1,37 +1,42 @@
 package com.study.ailawassistant.ai;
 
-import com.study.ailawassistant.dto.AiArticleCandidateDto;
-import com.study.ailawassistant.dto.AiQuestionRequest;
-import com.study.ailawassistant.dto.AiRerankResponse;
-import com.study.ailawassistant.dto.LawArticleDto;
+import com.study.ailawassistant.dto.*;
+import com.study.ailawassistant.entity.LawArticle;
 import com.study.ailawassistant.repository.LawArticleRepository;
 import com.study.ailawassistant.repository.LawArticleSearchRepository;
 import com.study.ailawassistant.repository.SearchMode;
+import com.study.ailawassistant.service.LawArticleService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import java.util.Set;
+
+import java.util.*;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AiService {
 
     private final LawArticleSearchRepository lawArticleSearchRepository;
     private final AiRerankService aiRerankService;
+    private final LawArticleRepository lawArticleRepository;
+    private final AiAnswerService aiAnswerService;
 
     public AiService(
             @Qualifier("lawArticleSearchRepositoryImpl")
             LawArticleSearchRepository lawArticleSearchRepository,
-            AiRerankService aiRerankService
+            AiRerankService aiRerankService,
+            LawArticleRepository lawArticleRepository,
+            AiAnswerService aiAnswerService
     ) {
         this.lawArticleSearchRepository = lawArticleSearchRepository;
         this.aiRerankService = aiRerankService;
+        this.lawArticleRepository = lawArticleRepository;
+        this.aiAnswerService = aiAnswerService;
     }
 
-    public AiRerankResponse findRelevantArticles(AiQuestionRequest request) {
+    public AiAnswerResponse findRelevantArticles(AiQuestionRequest request) {
 
         // 1. 질문에서 검색 키워드 추출
         List<String> keywords = Arrays.stream(
@@ -80,8 +85,65 @@ public class AiService {
                 })
                 .toList();
 
-        // 6. 변환된 후보 목록 반환
-        return aiRerankService.rerank(request.question(), candidates);
+        // 1. AI가 선택한 조문 ID 받기
+        AiRerankResponse rerankResult =
+                aiRerankService.rerank(request.question(), candidates);
+
+        // 2. 선택된 ID 목록 추출
+        List<Long> selectedIds = rerankResult.selectedArticleIds();
+
+        // 3. ID를 이용해 DB에서 조문 전문 조회
+        List<LawArticle> selectedArticles =
+                lawArticleRepository.findAllById(selectedIds);
+
+        Map<Long, LawArticle> articleMap = selectedArticles.stream()
+                .collect(Collectors.toMap(
+                        LawArticle::getArticleId,
+                        article -> article
+                ));
+
+        List<LawArticle> orderedArticles = selectedIds.stream()
+                .map(articleMap::get)
+                .filter(Objects::nonNull)
+                .toList();
+
+        Map<Long, AiArticleCandidateDto> candidateMap =
+                candidates.stream()
+                        .collect(Collectors.toMap(
+                                AiArticleCandidateDto::articleId,
+                                candidate -> candidate
+                        ));
+
+        List<AiArticleReferenceDto> references = orderedArticles.stream()
+                .map(article -> {
+                    AiArticleCandidateDto candidate =
+                            candidateMap.get(article.getArticleId());
+
+                    return new AiArticleReferenceDto(
+                            article.getArticleId(),
+                            candidate.lawName(),
+                            article.getArticleNo(),
+                            article.getArticleTitle(),
+                            article.getEffectiveDate()
+                    );
+                })
+                .toList();
+
+        String answer = aiAnswerService.generateAnswer(
+                request.question(),
+                orderedArticles
+        );
+
+        List<Long> finalIds = orderedArticles.stream()
+                .map(LawArticle::getArticleId)
+                .toList();
+
+        return new AiAnswerResponse(
+                answer,
+                searchDate,
+                finalIds,
+                references
+        );
     }
 
     private static final Set<String> STOP_WORDS = Set.of(
