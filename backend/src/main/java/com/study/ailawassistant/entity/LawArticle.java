@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+
 @Entity
 @Table(name = "law_article")
 public class LawArticle {
@@ -67,6 +68,9 @@ public class LawArticle {
         return articleContent;
     }
 
+    public LocalDate getEffectiveDate() {
+        return effectiveDate;
+    }
 
     public LawArticle( //외부 API에서 받은 데이터를 새로운 LawArticle 객체로 만들어 DB에 저장
             Long lawSerialNo,
