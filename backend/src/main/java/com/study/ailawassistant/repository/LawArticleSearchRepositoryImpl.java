@@ -84,22 +84,56 @@ public class LawArticleSearchRepositoryImpl
                         searchDate
                 ),
                 cb.or(
+                        // 1. 시행일이 더 늦은 경우
                         cb.greaterThan(
                                 newer.<LocalDate>get("effectiveDate"),
                                 version.<LocalDate>get("effectiveDate")
                         ),
+
                         cb.and(
+                                // 2. 시행일이 동일한 경우
                                 cb.equal(
                                         newer.get("effectiveDate"),
                                         version.get("effectiveDate")
                                 ),
-                                cb.greaterThan(
-                                        newer.<Long>get("lawSerialNo"),
-                                        version.<Long>get("lawSerialNo")
+
+                                cb.or(
+                                        // 3. 공포일이 더 늦은 경우
+                                        cb.greaterThan(
+                                                newer.<LocalDate>get("promulgationDate"),
+                                                version.<LocalDate>get("promulgationDate")
+                                        ),
+
+                                        cb.and(
+                                                // 4. 공포일도 동일한 경우
+                                                cb.equal(
+                                                        newer.get("promulgationDate"),
+                                                        version.get("promulgationDate")
+                                                ),
+
+                                                cb.or(
+                                                        cb.greaterThan(
+                                                                newer.<Integer>get("promulgationNo"),
+                                                                version.<Integer>get("promulgationNo")
+                                                        ),
+
+                                                        cb.and(
+                                                                cb.equal(
+                                                                        newer.get("promulgationNo"),
+                                                                        version.get("promulgationNo")
+                                                                ),
+                                                                cb.greaterThan(
+                                                                        newer.<Long>get("lawSerialNo"),
+                                                                        version.<Long>get("lawSerialNo")
+                                                                )
+                                                        )
+                                                )
+                                        )
                                 )
                         )
                 )
         );
+
 
         // 3. 더 최근 버전이 없는 경우만 통과
         conditions.add(cb.not(cb.exists(subquery)));
@@ -289,18 +323,54 @@ public class LawArticleSearchRepositoryImpl
                         searchDate
                 ),
                 cb.or(
+                        // 시행일이 더 늦은 버전
                         cb.greaterThan(
                                 countNewer.<LocalDate>get("effectiveDate"),
                                 countVersion.<LocalDate>get("effectiveDate")
                         ),
+
                         cb.and(
+                                // 시행일이 동일한 경우
                                 cb.equal(
                                         countNewer.get("effectiveDate"),
                                         countVersion.get("effectiveDate")
                                 ),
-                                cb.greaterThan(
-                                        countNewer.<Long>get("lawSerialNo"),
-                                        countVersion.<Long>get("lawSerialNo")
+
+                                cb.or(
+                                        // 공포일이 더 늦은 경우
+                                        cb.greaterThan(
+                                                countNewer.<LocalDate>get("promulgationDate"),
+                                                countVersion.<LocalDate>get("promulgationDate")
+                                        ),
+
+                                        cb.and(
+                                                // 공포일도 동일한 경우
+                                                cb.equal(
+                                                        countNewer.get("promulgationDate"),
+                                                        countVersion.get("promulgationDate")
+                                                ),
+
+                                                cb.or(
+                                                        // 공포번호가 더 큰 경우
+                                                        cb.greaterThan(
+                                                                countNewer.<Integer>get("promulgationNo"),
+                                                                countVersion.<Integer>get("promulgationNo")
+                                                        ),
+
+                                                        cb.and(
+                                                                // 공포번호까지 동일한 경우
+                                                                cb.equal(
+                                                                        countNewer.get("promulgationNo"),
+                                                                        countVersion.get("promulgationNo")
+                                                                ),
+
+                                                                cb.greaterThan(
+                                                                        countNewer.<Long>get("lawSerialNo"),
+                                                                        countVersion.<Long>get("lawSerialNo")
+                                                                )
+                                                        )
+                                                )
+                                        )
                                 )
                         )
                 )
