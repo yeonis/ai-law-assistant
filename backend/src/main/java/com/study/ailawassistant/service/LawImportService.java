@@ -109,23 +109,6 @@ public class LawImportService {
                 .path("조문")
                 .path("조문단위");
 
-        for (JsonNode article : articles) {
-
-            if (!"조문".equals(article.path("조문여부").asText())) {
-                continue;
-            }
-
-//            if (!article.path("호").isEmpty()
-//                    && article.path("항").isEmpty()) {
-//
-//                directItemCount++;
-//                System.out.println("발견한 조문: "
-//                        + article.path("조문번호").asText());
-//            }
-        }
-
-        //System.out.println("항 없이 호가 있는 조문 개수: " + directItemCount);
-
         List<LawArticle> lawArticles = new ArrayList<>();
 
         for (JsonNode article : articles) {
@@ -172,11 +155,6 @@ public class LawImportService {
             }
 
             String articleContent = content.toString();
-
-            if (articleNo == 2) {
-                System.out.println("===== 관세법 제2조 =====");
-                System.out.println(articleContent);
-            }
 
             LawArticle lawArticle = new LawArticle(
                     lawSerialNo,
